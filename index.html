@@ -27,7 +27,14 @@
     <div id = 'here'></div>
     <div id = 'here2'></div>
     <canvas id = "canv" width="700px" height="500px"></canvas>
-    
+    <script type="importmap">
+    {
+        "imports": {
+            "three": "../three/build/three.module.js",
+            "three/examples/jsm/controls/OrbitControls":"../three/examples/jsm/controls/OrbitControls.js",
+        }
+    }
+    </script>
     <script type = "module">
         const starp = document.createElement('starp');
         const here = document.getElementById('here');
