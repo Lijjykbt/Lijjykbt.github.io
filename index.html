@@ -29,12 +29,12 @@
     <div id = 'here2'></div>
     <canvas id = "canv" width="700px" height="500px"></canvas>
     <script type="importmap">
-    {
-        "imports": {
-            "three": "../three/build/three.module.js",
-            "three/examples/jsm/controls/OrbitControls":"../three/examples/jsm/controls/OrbitControls.js",
+        {
+          "imports": {
+            "three": "https://unpkg.com/three@0.155.0/build/three.module.js",
+            "three/addons/": "https://unpkg.com/three@0.155.0/examples/jsm/"
+          }
         }
-    }
     </script>
     <script type = "module">
         const starp = document.createElement('starp');
@@ -42,8 +42,8 @@
         const start = document.createElement('start');
         const here2 = document.getElementById('here2');
 
-        import * as THREE from "../three/build/three.module.js"
-        import { OrbitControls } from "../three/examples/jsm/controls/OrbitControls.js";
+        import * as THREE from "three/build/three.module.js"
+        import { OrbitControls } from "three/addons/controls/OrbitControls.js";
         const toggleList = document.querySelectorAll(".toggleSwitch");
 
 
