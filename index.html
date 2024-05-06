@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang = 'en'>
+    <head>
+        <meta charser = "UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style link="./style.css"></style>
+    <title>threejs</title>
+    <link rel = "stylesheet" href = "toggle.css">
+    
+</head>
+<body>
+
+    
+    <label for="toggle" class="toggleSwitch">
+        <span class="toggleButton"></span>
+    </label>
+    <label for="toggle" class="toggleSwitch blue">
+        <span class="toggleButton"></span>
+    </label>
+    <label for="toggle" class="toggleSwitch green">
+        <span class="toggleButton"></span>
+    </label>
+    <label for="toggle" class="toggleSwitch black">
+        <span class="toggleButton"></span>
+    </label>
+    
+    <div id = 'here'></div>
+    <div id = 'here2'></div>
+    <canvas id = "canv" width="700px" height="500px"></canvas>
+    
+    <script type = "module">
+        const starp = document.createElement('starp');
+        const here = document.getElementById('here');
+        const start = document.createElement('start');
+        const here2 = document.getElementById('here2');
+
+        import * as THREE from 'three'
+        import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls';
+        const toggleList = document.querySelectorAll(".toggleSwitch");
+
+
+        let vdate = {};
+        vdate.time=0*60*60;
+        vdate.month=3;
+        vdate.day = 20;
+        let daytilmon = [0,31,59,90,120,151,181,212,243,273,304,334];
+        const scene  = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(50, window.innerWidth/ window.innerHeight,0.1,1000);
+        const Canv = document.querySelector('#canv');
+        Canv.setAttribute("width", window.innerWidth*0.9);
+        Canv.setAttribute("height", window.innerHeight*0.9);
+        const renderer = new THREE.WebGLRenderer({canvas:Canv,antialias : true});
+        const textureLoader = new THREE.TextureLoader();
+        const color = 0x404040;
+        let axes = new THREE.AxesHelper(5);
+        scene.add(axes);
+        let r=20;
+        let con = {}
+        con.koc=0;
+        con.realtime=0;
+        con.movearth = 0;
+        con.horizon = 0;
+        var axis = {};//(90-23.5)
+        axis.theta = (23.5)*Math.PI/180.0;
+        axis.phi = (90-23.5)*Math.PI/180.0;
+        axis.x= r*Math.cos(axis.phi)*Math.cos(axis.theta);
+        axis.y= r*Math.sin(axis.phi);
+        axis.z= r*Math.cos(axis.phi)*Math.sin(axis.theta) ;
+        function setaxis(ax){
+            ax.x= r*Math.cos(ax.phi)*Math.cos(ax.theta);
+            ax.y= r*Math.sin(ax.phi);
+            ax.z= r*Math.cos(ax.phi)*Math.sin(ax.theta) ;
+        }
+        //console.log(axis.x);
+        let sun = {
+            posx : 20,
+            posy : 0,
+            posz : 0,
+            w : 0.01
+
+        };
+        function rotate(obj){
+            obj.rotation.reorder('XZY');
+            obj.rotation.x = Math.atan(axis.z/axis.y);
+            obj.rotation.z =  -Math.asin(axis.x/r);
+            if(axis.y>=0){
+                obj.rotation.z =  -Math.asin(axis.x/r);
+
+                //console.log("+");
+                //console.log(obj.rotation.z/Math.PI*180);
+            }
+            else{
+                obj.rotation.z =  Math.PI+Math.asin(axis.x/r);
+
+                //console.log("-");
+                //console.log(obj.rotation.z/Math.PI*180);
+            }
+            //console.log(obj.rotation.x/Math.PI*180);
+
+
+        }
+        function rotatemiss(per){
+
+            let x = 0;
+            let y= 0;
+            let z = 0;
+            let ax = 0;
+            let ay = 0;
+            let az = 0;
+            let axisx = 0;
+            let axisy = 1*Math.sin(per.phi);
+            let axisz = 0;
+
+            //console.log(person.px,person.py,person.pz);
+            if(axis.y>=0){
+                x = person.px*Math.cos(-Math.asin(axis.x/r))-person.py*Math.sin(-Math.asin(axis.x/r));
+                y = person.px*Math.sin(-Math.asin(axis.x/r))+person.py*Math.cos(-Math.asin(axis.x/r));
+                ax = axisx*Math.cos(-Math.asin(axis.x/r))-axisy*Math.sin(-Math.asin(axis.x/r));
+                ay = axisx*Math.sin(-Math.asin(axis.x/r))+axisy*Math.cos(-Math.asin(axis.x/r));
+
+
+            }
+            else{
+                ax = axisx*Math.cos(Math.PI+Math.asin(axis.x/r))-axisy*Math.sin(Math.PI+Math.asin(axis.x/r));
+                ay = axisx*Math.sin(Math.PI+Math.asin(axis.x/r))+axisy*Math.cos(Math.PI+Math.asin(axis.x/r));
+                x = person.px*Math.cos(Math.PI+Math.asin(axis.x/r))-person.py*Math.sin(Math.PI+Math.asin(axis.x/r));
+                y = person.px*Math.sin(Math.PI+Math.asin(axis.x/r))+person.py*Math.cos(Math.PI+Math.asin(axis.x/r));
+
+            }
+            person.px = x;
+            person.py = y;
+            axisx = ax;
+            axisy = ay;
+            //console.log(person.px,person.py,person.pz);
+            z = person.pz*Math.cos(-Math.atan(axis.z/axis.y))-person.py*Math.sin(-Math.atan(axis.z/axis.y));
+            y = person.pz*Math.sin(-Math.atan(axis.z/axis.y))+person.py*Math.cos(-Math.atan(axis.z/axis.y));
+            az = axisz*Math.cos(-Math.atan(axis.z/axis.y))-axisy*Math.sin(-Math.atan(axis.z/axis.y));
+            ay = axisz*Math.sin(-Math.atan(axis.z/axis.y))+axisy*Math.cos(-Math.atan(axis.z/axis.y));
+
+            person.pz = z;
+            person.py = y;
+            axisz = az;
+            axisy = ay;
+           // console.log(person.px,person.py,person.pz);
+            person.perhead2.position.set(2*person.px,2*person.py,2*person.pz);
+            person.perhead3.position.set(2*person.x,2*person.y,2*person.z);
+            person.perhead4.position.set(axisx,axisy,axisz);
+            //console.log(person.px**2+person.py**2+person.pz**2);
+            const vect1 = new THREE.Vector3(person.px-axisx,person.py-axisy,person.pz-axisz)
+            const vect2 = new THREE.Vector3(0-axisx,1-axisy,0-axisz);
+            if(axis.y>=0)
+                return -vect1.angleTo(vect2);
+            return vect1.angleTo(vect2);
+            //console.log(obj.rotation.x/Math.PI*180);
+
+        }
+        function movStar(Star){
+            let the = vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI;
+            let x= r*Math.cos(Star.phi*Math.PI/180)*Math.cos(Star.theta/24*(-2)*Math.PI+the+Math.PI/2);
+            let y= r*Math.sin(Star.phi*Math.PI/180);
+            let z= r*Math.cos(Star.phi*Math.PI/180)*Math.sin(Star.theta/24*(-2)*Math.PI+the+Math.PI/2) ;
+            let xp;
+            let yp;
+            let zp;
+            if(axis.y>=0){
+                xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
+                yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
+
+
+            }
+            else{
+                xp = x*Math.cos(Math.PI+Math.asin(axis.x/r))-y*Math.sin(Math.PI+Math.asin(axis.x/r));
+                yp = x*Math.sin(Math.PI+Math.asin(axis.x/r))+y*Math.cos(Math.PI+Math.asin(axis.x/r));
+
+            }
+            x = xp;
+            y = yp
+            zp = z*Math.cos(-Math.atan(axis.z/axis.y))-y*Math.sin(-Math.atan(axis.z/axis.y));
+            yp = z*Math.sin(-Math.atan(axis.z/axis.y))+y*Math.cos(-Math.atan(axis.z/axis.y));
+            y = yp;
+            z = zp;
+            Star.x = x;
+            Star.y = y;
+            Star.z = z;
+        }
+        function setsunpos(sun){
+            sun.ang = -(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180+((daytilmon[2]+(20-1))*(360/365))*Math.PI/180+Math.PI/2;
+            let thet = vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI;
+            //thet-=axis.theta;
+            let y = r*Math.cos(sun.ang)*Math.sin(23.5*Math.PI/180);
+            let x = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.cos(thet))-(r*Math.sin(sun.ang)*Math.sin(thet));
+            let z = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.sin(thet))+(r*Math.sin(sun.ang)*Math.cos(thet));
+            
+            let xp;
+            let yp;
+            let zp;
+            if(axis.y>=0){
+                xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
+                yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
+
+
+            }
+            else{
+                xp = x*Math.cos(Math.PI+Math.asin(axis.x/r))-y*Math.sin(Math.PI+Math.asin(axis.x/r));
+                yp = x*Math.sin(Math.PI+Math.asin(axis.x/r))+y*Math.cos(Math.PI+Math.asin(axis.x/r));
+
+            }
+            x = xp;
+            y = yp
+            zp = z*Math.cos(-Math.atan(axis.z/axis.y))-y*Math.sin(-Math.atan(axis.z/axis.y));
+            yp = z*Math.sin(-Math.atan(axis.z/axis.y))+y*Math.cos(-Math.atan(axis.z/axis.y));
+            y = yp;
+            z = zp;
+            sun.posx = x;
+            sun.posy = y;
+            sun.posz = z;
+        }
+        function  rotatesuncor(obj){
+            obj.rotation.reorder('YXZ');
+            obj.rotation.y =Math.PI/2-axis.theta;
+
+            obj.rotation.x =  Math.PI/2-axis.phi+66.5*Math.PI/180;
+
+
+
+        }
+        function rotsuncor(obj){
+            let thet = vdate.time/86400*(360)*Math.PI/180-Math.PI+(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180-((daytilmon[2]+(20-1))*(360/365))*Math.PI/180-Math.PI/2;
+            
+            thet+=Math.PI;
+            let ph = 66.5*Math.PI/180;
+            let x = Math.cos(ph)*Math.cos(thet)
+            let y = Math.sin(ph);
+            let z = Math.cos(ph)*Math.sin(thet)
+            if(0){
+                thet+=Math.PI;
+                thet-=axis.theta;
+                y = Math.cos(-thet)*Math.sin(Math.PI/2+axis.phi);
+                x = (Math.cos(-thet)*Math.cos(Math.PI/2+axis.phi)*Math.cos(axis.theta))-(Math.sin(-thet)*Math.sin(axis.theta));
+                z = (Math.cos(-thet)*Math.cos(Math.PI/2+axis.phi)*Math.sin(axis.theta))+(Math.sin(-thet)*Math.cos(axis.theta));
+                
+                x*=Math.cos(66.5*Math.PI/180);
+                y*=Math.cos(66.5*Math.PI/180);
+                z*=Math.cos(66.5*Math.PI/180);
+                let ax = Math.cos(axis.phi)*Math.cos(axis.theta)
+                let ay = Math.sin(axis.phi);
+                let az = Math.cos(axis.phi)*Math.sin(axis.theta)
+                ax*=Math.sin(66.5*Math.PI/180);
+                ay*=Math.sin(66.5*Math.PI/180);
+                az*=Math.sin(66.5*Math.PI/180);
+                x+=ax;
+                y+=ay;
+                z+=az;
+                
+                console.log(x.toFixed(2),y.toFixed(2),z.toFixed(2));
+            }
+            /**/
+            //
+            else{
+                let xp;
+                let yp;
+                let zp;
+                if(axis.y>=0){
+                    xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
+                    yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
+
+
+                }
+                else{
+                    xp = x*Math.cos(Math.PI+Math.asin(axis.x/r))-y*Math.sin(Math.PI+Math.asin(axis.x/r));
+                    yp = x*Math.sin(Math.PI+Math.asin(axis.x/r))+y*Math.cos(Math.PI+Math.asin(axis.x/r));
+
+                }
+                x = xp;
+                y = yp
+                zp = z*Math.cos(-Math.atan(axis.z/axis.y))-y*Math.sin(-Math.atan(axis.z/axis.y));
+                yp = z*Math.sin(-Math.atan(axis.z/axis.y))+y*Math.cos(-Math.atan(axis.z/axis.y));
+                y = yp;
+                z = zp;
+                //console.log(xp*xp+zp*zp+yp*yp);
+                ph = Math.asin(yp);
+                thet = Math.acos(xp/Math.cos(ph));
+                //console.log((thet/Math.PI*180).toFixed(2),(ph/Math.PI*180).toFixed(2));
+                
+            }
+                
+            
+            if(y>=0)
+                ph = Math.asin(y);
+            else
+                ph = Math.asin(y);
+            if(z>=0)
+                thet = -Math.acos(x/Math.cos(ph));
+            else
+                thet = Math.acos(x/Math.cos(ph));
+            obj.rotation.reorder('YXZ');
+            obj.rotation.y =-Math.PI/2+thet;
+
+            obj.rotation.x =  ph;
+
+        }
+        function rotatecor(obj,i,de){
+            obj.rotation.reorder('XZY');
+
+            obj.rotation.z =  axis.theta;
+            obj.rotation.y = -Math.PI/2+ axis.phi;
+            obj.rotation.x = de;
+            let rp = Math.sin(Math.PI / nofline *i-Math.PI/2);
+            obj.position.set(rp*axis.x,rp*axis.y,rp*axis.z);
+
+            //console.log(obj.rotation.x/Math.PI*180);
+
+        }
+        let person = {};
+        person.theta = 128*Math.PI/180;
+        person.phi = 38*Math.PI/180;
+        person.rtheta = person.theta;
+        person.rphi = person.phi;
+        let pss = new THREE.SphereGeometry(0.1,64,64);
+        let mater = new THREE.MeshBasicMaterial( { color: 0xFF00FF } );
+        person.perhead = new THREE.Mesh(pss,mater);
+        scene.add(person.perhead);
+        pss = new THREE.SphereGeometry(0.01,64,64);
+        person.perhead2 = new THREE.Mesh(pss,mater);
+        scene.add(person.perhead2);
+        person.perhead3 = new THREE.Mesh(pss,mater);
+        scene.add(person.perhead3);
+        person.perhead4 = new THREE.Mesh(pss,mater);
+        scene.add(person.perhead4);
+        const cone = new THREE.ConeGeometry( 0.1, 0.2, 32 );
+
+        person.perbody = new THREE.Mesh(cone, mater );
+        scene.add( person.perbody );
+        function setperson(per){
+            per.x = 2.3*Math.cos(per.rphi)*Math.cos(per.rtheta);
+            per.y= 2.3*Math.sin(per.rphi);
+            per.z= 2.3*Math.cos(per.rphi)*Math.sin(per.rtheta) ;
+            per.px = Math.cos(per.phi)*Math.cos(per.theta);
+            per.py= Math.sin(per.phi);
+            per.pz= Math.cos(per.phi)*Math.sin(per.theta) ;
+
+            per.perhead.position.set(per.x,per.y,per.z);
+
+            per.perbody.position.set(0.9*per.x,0.9*per.y,0.9*per.z);
+            per.perbody.rotation.reorder("YZX");
+            person.perbody.rotation.y =  (Math.PI/2-person.rtheta);
+            person.perbody.rotation.x = -Math.PI/2-person.rphi;
+        }
+
+        pss = new THREE.SphereGeometry(0.7,64,64);
+        mater = new THREE.MeshBasicMaterial( { color: 0xFFFFFF } );
+        let Star = {};
+        Star.star = new THREE.Mesh(pss,mater);
+
+
+        const sphere = new THREE.SphereGeometry(2,64,64);
+        const earmat = new THREE.MeshStandardMaterial({
+            map: textureLoader.load("earth/textures/Material.002_diffuse.jpeg"),
+        });//Material.002_diffuse.jpeg
+
+        let earth={};
+        earth.degree = 0;
+        earth.Earth = new THREE.Mesh(sphere,earmat);
+
+        //earth.Earth.rotation.
+        earth.Earth.rotation.reorder('XZY');
+
+        earth.Earth.rotation.x =Math.PI/2-Math.atan(axis.y/axis.z);
+        earth.Earth.rotation.z =  -Math.asin(axis.x/r);
+        scene.add(earth.Earth);
+
+        renderer.outputEncoding = THREE.sRGBEncoding;
+
+        //scene.background = new THREE.Color('white');
+
+        /*let light = new THREE.DirectionalLight( 0xffffff, 1 );;
+        light.position.set(0,0,30);
+        light.target = earth.Earth;
+        scene.add(light);
+        let light2 = new THREE.DirectionalLight( 0xffffff, 1 );;
+        light2.position.set(0,0,-30);
+        light2.target = earth.Earth;
+        scene.add(light2);*/
+        sun.directionalLight = new THREE.DirectionalLight( 0xffffff, 1 );
+        sun.directionalLight.position.set(0,0,10);
+        sun.directionalLight.target = earth.Earth;
+        scene.add( sun.directionalLight );
+
+
+
+        const box = new THREE.BoxGeometry(1,1,1);
+        const box1Material = new THREE.MeshBasicMaterial( { color: 0xffffff } );
+        const box1 = new THREE.Mesh(box, box1Material);
+        scene.add(box1);/*
+
+        const geo = new THREE.SphereGeometry(2,64,64);
+        const material = new THREE.MeshBasicMaterial({color: 0xffffff});
+        const sphere = new THREE.Mesh(geo,material);
+        sphere.position.set(0,10,10);
+        scene.add(sphere);
+
+        const ge = new THREE.CircleGeometry(5,32);
+        const circle = new THREE.Mesh(ge,material);
+        scene.add(circle);*/
+        mater = new THREE.MeshBasicMaterial( { color: 'yellow' } );
+        const points = [];
+        points.push( new THREE.Vector3( -axis.x,-axis.y,-axis.z  ) );
+        points.push( new THREE.Vector3( axis.x,axis.y,axis.z ) );
+        let geom = new THREE.BufferGeometry().setFromPoints( points );
+        let line = new THREE.Line( geom, mater );
+        scene.add(line);
+
+
+
+
+
+
+        mater = new THREE.MeshBasicMaterial( { color: 'gray' } );
+        let cordin = []
+        let nofline = 18;
+
+        for(let i = 0;i<nofline;i++)
+        {
+
+            cordin.push(new THREE.Mesh(new THREE.TorusGeometry( 20, 0.008, 16, 100 ),mater));
+            //cordin[cordin.length-1].rotation.x = axis.phi;
+            //cordin[cordin.length-1].rotation.y = axis.theta+(Math.PI/2.3) ;
+
+            cordin[cordin.length-1].rotation.reorder('XZY');
+             //cordin[cordin.length-1].rotation.x = axis.phi;
+            cordin[i].rotation.y += Math.PI / nofline *i;
+            scene.add(cordin[cordin.length-1]);
+
+
+        }
+
+        for( let i = 0;i<nofline;i++)
+        {
+
+            cordin.push(new THREE.Mesh(new THREE.TorusGeometry( r*Math.cos(Math.PI / nofline *i-Math.PI/2), 0.008, 16, 100 ),mater));
+            //cordin[cordin.length-1].rotation.x = axis.phi;
+            //cordin[cordin.length-1].rotation.y = axis.theta+(Math.PI/2.3) ;
+
+            cordin[cordin.length-1].rotation.reorder('XZY');
+
+            cordin[cordin.length-1].rotation.x = Math.PI/2;
+
+            scene.add(cordin[cordin.length-1]);
+
+
+        }
+        mater = new THREE.MeshBasicMaterial( { color: 'red' } );
+        cordin.push(new THREE.Mesh(new THREE.TorusGeometry( r, 0.06, 16, 100 ),mater));
+        scene.add(cordin[cordin.length-1]);
+        mater = new THREE.MeshBasicMaterial( { color: 'yellow' } );
+        cordin.push(new THREE.Mesh(new THREE.TorusGeometry( r, 0.06, 16, 100 ),mater));
+        scene.add(cordin[cordin.length-1]);
+
+
+
+
+        /*let geometry = new THREE.TorusGeometry( 20, 0.1, 16, 100 );
+
+        const torus = new THREE.Mesh( geometry, mater );
+        scene.add( torus );
+
+        geometry = new THREE.TorusGeometry( 20, 0.1, 16, 100 );
+
+        let tor = new THREE.Mesh( geometry, mater );
+        tor.rotation.x = Math.PI / 2;
+        scene.add( tor );
+
+        geometry = new THREE.TorusGeometry( 20, 0.1, 16, 100 );
+        let toru = new THREE.Mesh( geometry, mater );
+        toru.rotation.y = Math.PI / 2;
+        scene.add( toru );*/
+
+        mater = new THREE.MeshBasicMaterial( { color: 0xffff55 } );
+        let geo = new THREE.SphereGeometry(0.5,64,64);
+        sun.sunsphere = new THREE.Mesh(geo,mater);
+        sun.sunsphere.position.set(20,0,0);
+        sun.sunsph = [];
+        sun.idx = 0;
+        scene.add(sun.sunsphere);
+        let horgeo = new THREE.CircleGeometry(30,64);
+        let hormat = new THREE.MeshBasicMaterial( { color: 0xeeffee ,opacity:0.7,transparent:true} ); //,side: THREE.DoubleSide
+        let horizon = new THREE.Mesh(horgeo,hormat);
+        scene.add(horizon);
+        horizon.rotation.x = -Math.PI/2;
+        console.log("dajkl");
+        camera.position.z = 10;
+        camera.position.x = 0;
+        camera.position.set(0,0,60);
+        camera.lookAt(new THREE.Vector3(0,0,0));
+        const controls = new OrbitControls(camera, renderer.domElement);
+        controls.minDistance = 0
+        controls.maxDistance = 500
+        //controls.maxPolarAngle = Math.PI / 2
+        controls.update()
+        let vel = {};
+        vel.sro = 0.01;
+        vel.gro = 0.0005;
+        sun.ang = -(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180+((daytilmon[2]+(20-1))*(360/365))*Math.PI/180+Math.PI/2;
+        
+        
+        /*Star.phi = 38+48/60;
+        Star.theta = 18+37/60;*/
+        /*Star.phi = 30;
+        Star.theta = 8;*/
+        Star.theta = 6;
+        Star.phi = 7.4;
+        Star.x= r*Math.cos(Star.phi*Math.PI/180)*Math.cos(Star.theta/24*(-2)*Math.PI);
+        Star.y= r*Math.sin(Star.phi*Math.PI/180);
+        Star.z= r*Math.cos(Star.phi*Math.PI/180)*Math.sin(Star.theta/24*(-2)*Math.PI) ;
+        
+        Star.star.position.set(20,0,0);
+        Star.star.scale.set(0.7,0.7,0.7);
+        scene.add(Star.star);
+        
+        function animate() {
+            
+            let today = new Date;
+            toggleList.forEach(($toggle) => {
+                $toggle.onclick = () => {
+                    $toggle.classList.toggle('active');
+                    console.log($toggle.className)
+                    if($toggle.className=="toggleSwitch green active")
+                        con.horizon=1;
+                    if($toggle.className=="toggleSwitch green")
+                        con.horizon=0;  
+                    if($toggle.className=="toggleSwitch active")
+                        con.koc=1;
+                    if($toggle.className=="toggleSwitch")
+                        con.koc=0;
+                    if($toggle.className=="toggleSwitch blue active")
+                        con.movearth=1;
+                    if($toggle.className=="toggleSwitch blue")
+                        con.movearth=0;
+                    if($toggle.className=="toggleSwitch black active")
+                        con.realtime=1;
+                    if($toggle.className=="toggleSwitch black")
+                        con.realtime=0;
+                }
+            });
+            //console.log(today.toLocaleDateString());
+            //console.log(today.getUTCHours());
+            //console.log(today.getUTCMinutes());
+            //console.log(vdate.month,vdate.day,vdate.time);
+            //con.realtime  = 0;
+            if(con.realtime==1)
+            {
+                vdate.time = today.getUTCHours()*3600+today.getUTCMinutes()*60+today.getUTCSeconds();
+                vdate.month = today.getMonth()+1;
+                vdate.day = today.getDate();
+                
+            }
+            console.log(vdate.time.toFixed(2),vdate.day.toFixed(2),vdate.month.toFixed(2))
+            if(con.realtime == 0)
+            {
+                vdate.time+=80;
+                
+                //vdate.day++;
+
+                if(vdate.time>=86400)
+                {
+                    vdate.time = 0;
+                    vdate.day++;
+                }
+                if(vdate.day>30)
+                {
+                    if(vdate.month==4||vdate.month==6||vdate.month==9||vdate.month==11)
+                    {
+                        vdate.month++;
+                        vdate.day = 1;
+                    }
+
+                }
+                if(vdate.day>31)
+                {
+                    if(vdate.month==1||vdate.month==3||vdate.month==5||vdate.month==7||vdate.month==8||vdate.month==10||vdate.month==12)
+                    {
+                        vdate.month++;
+                        vdate.day = 1;
+                    }
+
+                }
+                if(vdate.day>28)
+                {
+                    if(vdate.month==2)
+                    {
+                        vdate.month++;
+                        vdate.day = 1;
+                    }
+
+                }
+                vdate.month = (vdate.month-1)%12+1;
+
+            }
+
+            //axis.phi+=0.01;
+            //axis.theta=time/100;
+            //earth.degree = -time/100;
+            setaxis(axis);
+            setperson(person);
+
+            //console.log(axis.phi/Math.PI*180.0);
+            if(axis.y>=0){
+                earth.Earth.rotation.y=earth.degree;
+            }
+            else{
+                earth.Earth.rotation.y=earth.degree+Math.PI;
+            }
+
+            box1.rotation.x+=0.01;
+
+
+            rotate(earth.Earth);
+            rotatecor(cordin[cordin.length-2],nofline/2,Math.PI/2);
+
+
+            /*cordin[cordin.length-1].rotation.reorder("YZX");
+            cordin[cordin.length-1].rotation.y =  -axis.theta;
+            cordin[cordin.length-1].rotation.z =-Math.PI+axis.phi+(23.5)*Math.PI/180;8*/
+            //cordin[cordin.length-1].rotation.x = (23.5)*Math.PI/180;
+            for( let i = 0;i<nofline;i++)
+            {
+                rotate(cordin[i]);
+                //cordin[i].rotation.y-=0.01;
+            }
+            for( let i = 0;i<nofline;i++)
+            {
+                rotatecor(cordin[i+nofline],i,Math.PI/2);
+
+            }
+            scene.remove(line);
+            mater = new THREE.MeshBasicMaterial( { color: 'green' } );
+            points[0] = new THREE.Vector3( -axis.x,-axis.y,-axis.z ) ;
+            points[1] = new THREE.Vector3( axis.x,axis.y,axis.z  ) ;
+            geom = new THREE.BufferGeometry().setFromPoints( points );
+
+            line = new THREE.Line( geom, mater );
+
+            scene.add(line);
+
+            
+            //axis.phi+=0.01;
+
+            //cordin[cordin.length-1].rotation.x +=0.01;
+            //cordin[cordin.length-1].rotation.z +=0.01;
+            sun.sunsphere.position.set(sun.posx,sun.posy,sun.posz);
+            sun.directionalLight.position.set(sun.posx,sun.posy,sun.posz);
+            sun.ang = -(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180+((daytilmon[2]+(20-1))*(360/365))*Math.PI/180+Math.PI/2;
+            //sun.posy = 20*Math.cos(time*sun.w);
+            Star.star.position.set(Star.x,Star.y,Star.z);
+            if(con.koc ==0)
+            {
+                horizon.visible = false;
+                
+                person.rphi = person.phi;
+                axis.phi = Math.PI/2;
+                //axis.theta = vdate.time*vel.sro;
+                rotatesuncor(cordin[cordin.length-1]);
+                if(con.movearth == 0){
+                    person.rtheta = person.theta;
+                    earth.Earth.rotation.y = 0;
+                    axis.theta = vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI;
+                }
+                //con.movearth = 0;
+                if(con.movearth == 1) {
+                    axis.theta = 0
+                    earth.Earth.rotation.y = (vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI);
+                    person.rtheta = person.theta-(vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI);
+                }
+                for( let i = 0;i<nofline;i++)
+                {
+
+                    cordin[i].rotation.y=Math.PI / nofline *i-axis.theta;
+                }
+
+                
+                //console.log(sun.ang*180/Math.PI);
+                Star.x= r*Math.cos(Star.phi*Math.PI/180)*Math.cos(Star.theta/24*(-2)*Math.PI+axis.theta+Math.PI/2);
+                Star.y= r*Math.sin(Star.phi*Math.PI/180);
+                Star.z= r*Math.cos(Star.phi*Math.PI/180)*Math.sin(Star.theta/24*(-2)*Math.PI+axis.theta+Math.PI/2) ;
+                console.log(Star.x*Star.x+Star.y*Star.y+Star.z*Star.z);
+                sun.posy = r*Math.cos(sun.ang)*Math.sin(23.5*Math.PI/180);
+                sun.posx = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.cos(axis.theta))-(r*Math.sin(sun.ang)*Math.sin(axis.theta));
+                sun.posz = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.sin(axis.theta))+(r*Math.sin(sun.ang)*Math.cos(axis.theta));
+            }
+            //person.theta = 90*Math.PI/180;
+            person.theta=-127*Math.PI/180;
+            person.phi =38*Math.PI/180;
+            //con.koc=1;
+            if(con.koc ==1)
+            {
+                starp.innerHTML = Math.asin(Star.y/r)*180/Math.PI;
+                here.appendChild(starp);
+                if(Star.z>=0)
+                {
+                    if(-(axis.theta-Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180<0)
+                        start.innerHTML=-(axis.theta-Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180+360;
+                    else
+                        start.innerHTML=-(axis.theta-Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180;
+                }
+                else
+                {
+                    if(-(axis.theta+Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180<0)
+                        start.innerHTML = -(axis.theta+Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180+360;
+                    else
+                        start.innerHTML = -(axis.theta+Math.acos(Star.x/r/Math.cos(Math.asin(Star.y/r))))*180/Math.PI-180;
+                }
+                    
+                
+                here2.appendChild(start);
+                if(con.horizon==1)
+                    horizon.visible = true;
+                else
+                    horizon.visible = false;
+                person.rtheta = 0;
+                person.rphi = Math.PI/2
+
+                //earth.degree =-rotatemiss(person);
+                //earth.Earth.rotation.y=-rotatemiss(person);
+                //rotatemiss(person)
+                earth.Earth.rotation.y = rotatemiss(person);
+                //console.log(Math.sin(person.phi));
+
+                //console.log(Math.acos((20*Math.cos(person.phi)*Math.cos(person.theta))/r)*180.0/Math.PI);
+                //console.log(person.theta*180.0/Math.PI);
+                //console.log("----");
+
+
+                rotsuncor(cordin[cordin.length-1]);
+                setsunpos(sun);
+                movStar(Star);
+                axis.theta = person.theta;
+                axis.phi = Math.PI-person.phi;
+                for( let i = 0;i<nofline;i++)
+                {
+                    cordin[i].rotation.y=Math.PI / nofline *i-vdate.time/86400*(360)*Math.PI/180-Math.PI+(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180-((daytilmon[2]+(20-1))*(360/365))*Math.PI/180-Math.PI/2;
+                }
+                /*sun.posy = r*Math.cos(sun.ang)*Math.sin(23.5*Math.PI/180);
+                sun.posx = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.cos(axis.theta))-(r*Math.sin(sun.ang)*Math.sin(axis.theta));
+                sun.posz = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.sin(axis.theta))+(r*Math.sin(sun.ang)*Math.cos(axis.theta));*/
+
+            }
+            mater = new THREE.MeshBasicMaterial( { color: 0xffff99 } );
+            geo = new THREE.SphereGeometry(0.1,64,64);
+            sun.sunsph[sun.idx] = new THREE.Mesh(geo,mater) ;
+            scene.add(sun.sunsph[sun.idx])
+            sun.idx++;
+            sun.sunsph[sun.idx-1].position.set(sun.posx,sun.posy,sun.posz);
+            for(let i=0;i<sun.idx;i++)
+            {
+                    
+                    sun.sunsph[i].scale.set(0.1*(i+50-sun.idx),0.02*(i+50-sun.idx),0.02*(i+50-sun.idx));
+            }
+            if(sun.idx>50)
+            {
+                scene.remove(sun.sunsph[0]);
+                
+                for(let i=0;i<50;i++)
+                {
+                    sun.sunsph[i] = sun.sunsph[i+1];
+                    sun.sunsph[i].scale.set(0.1*i,0.02*i,0.02*i);
+                }
+                sun.idx--;
+            }
+            camera.lookAt(new THREE.Vector3(0,0,0));
+            requestAnimationFrame(animate);
+            //controls.update();
+            renderer.render(scene, camera);
+        };
+
+        animate();
+
+    </script>
+    
+    
+</body>
+</html>
