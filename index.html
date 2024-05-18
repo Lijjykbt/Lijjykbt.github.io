@@ -24,7 +24,7 @@
     <label for="toggle" class="toggleSwitch black">
         <span class="toggleButton"></span>
     </label>
-    
+    <input type = "number" id = "theta">
     <div id = 'here'></div>
     <div id = 'here2'></div>
     <canvas id = "canv" width="700px" height="500px"></canvas>
@@ -520,6 +520,8 @@
         Star.x= r*Math.cos(Star.phi*Math.PI/180)*Math.cos(Star.theta/24*(-2)*Math.PI);
         Star.y= r*Math.sin(Star.phi*Math.PI/180);
         Star.z= r*Math.cos(Star.phi*Math.PI/180)*Math.sin(Star.theta/24*(-2)*Math.PI) ;
+
+        console.log(document.getElementById("theta").value);
         
         Star.star.position.set(20,0,0);
         Star.star.scale.set(0.7,0.7,0.7);
