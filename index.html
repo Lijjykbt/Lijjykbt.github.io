@@ -25,6 +25,7 @@
         <span class="toggleButton"></span>
     </label>
     <input type = "number" id = "theta">
+    <input type = "number" id = "phi">
     <div id = 'here'></div>
     <div id = 'here2'></div>
     <canvas id = "canv" width="700px" height="500px"></canvas>
@@ -528,7 +529,8 @@
         scene.add(Star.star);
         
         function animate() {
-            
+            Star.theta = document.getElementById("theta").value;
+            Star.phi = document.getElementById("phi").value;
             let today = new Date;
             toggleList.forEach(($toggle) => {
                 $toggle.onclick = () => {
