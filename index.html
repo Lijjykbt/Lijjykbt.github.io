@@ -11,7 +11,7 @@
 </head>
 <body>
 
-    
+    <meta charser = "UTF-8">
     <label for="toggle" class="toggleSwitch">
         <span class="toggleButton"></span>
     </label>
@@ -24,8 +24,9 @@
     <label for="toggle" class="toggleSwitch black">
         <span class="toggleButton"></span>
     </label>
-    <input type = "number" id = "theta">
-    <input type = "number" id = "phi">
+    <p>월(month) : <input type = "number" id = "month" style="width:40px;" value = 1>  일(date) : <input type = "number" id = "date" style="width:40px;" value = 1>  시간<input type="range" min="0" max="86399" value="0" id = "time" value = 0> <input type = "number" id = "hour" style="width:40px;" value = 0>시 <input type = "number" id = "min" style="width:40px;" value = 0>분 <input type = "number" id = "sec" style="width:40px;" value = 0>초   &nbsp;  &nbsp; &nbsp; &nbsp; &nbsp;    시간빠르기 : <input type = "number" id = "tspeed" style="width:40px;" value = 80>           </p> <!--<button  id="button">set</button>-->
+    <p>위도 : <input type = "number"  id = "lat" value = 127 style="width:40px;">  경도 : <input type = "number" id = "lon" style="width:40px;" value = 37>    &emsp;&emsp;&emsp;&emsp;&emsp;   별의 적경 : <input type = "number" id = "theta" style="width:40px;" value = 0>  별의 적위 : <input type = "number" id = "phi" style="width:40px;" value = 0></p>
+    
     <div id = 'here'></div>
     <div id = 'here2'></div>
     <canvas id = "canv" width="700px" height="500px"></canvas>
@@ -47,8 +48,9 @@
         import { OrbitControls } from "three/addons";
         const toggleList = document.querySelectorAll(".toggleSwitch");
 
-
+        let timespeed = 0;
         let vdate = {};
+        
         vdate.time=0*60*60;
         vdate.month=3;
         vdate.day = 20;
@@ -354,6 +356,7 @@
             per.perbody.rotation.reorder("YZX");
             person.perbody.rotation.y =  (Math.PI/2-person.rtheta);
             person.perbody.rotation.x = -Math.PI/2-person.rphi;
+            person.perbody.rotation.z = 0;
         }
 
         pss = new THREE.SphereGeometry(0.7,64,64);
@@ -569,7 +572,23 @@
             console.log(vdate.time.toFixed(2),vdate.day.toFixed(2),vdate.month.toFixed(2))
             if(con.realtime == 0)
             {
-                vdate.time+=80;
+                timespeed = parseFloat(document.getElementById("tspeed").value)
+                vdate.month =parseFloat(document.getElementById("month").value);
+                vdate.day =parseFloat(document.getElementById("date").value);
+                
+                
+                
+                //console.log(vdate.time)
+                if(!isNaN(parseFloat(document.getElementById("hour").value)*60*60+parseFloat(document.getElementById("min").value)*60+parseFloat(document.getElementById("sec").value)))
+                {
+                    if(vdate.time - (parseFloat(document.getElementById("hour").value)*60*60+parseFloat(document.getElementById("min").value)*60+parseFloat(document.getElementById("sec").value))!=0){
+                        vdate.time = parseFloat(document.getElementById("hour").value)*60*60+parseFloat(document.getElementById("min").value)*60+parseFloat(document.getElementById("sec").value);
+                    }
+                    else{
+                        vdate.time = parseFloat(document.getElementById("time").value);
+                    }
+                }
+                vdate.time+=timespeed;
                 
                 //vdate.day++;
 
@@ -606,7 +625,15 @@
 
                 }
                 vdate.month = (vdate.month-1)%12+1;
-
+                document.getElementById("month").value = vdate.month ;
+                document.getElementById("date").value = vdate.day;
+                document.getElementById("time").value = vdate.time;
+                if(!isNaN(parseFloat(document.getElementById("hour").value)*60*60+parseFloat(document.getElementById("min").value)*60+parseFloat(document.getElementById("sec").value)))
+                {
+                    document.getElementById("sec").value = vdate.time-60*parseInt(vdate.time/60);
+                    document.getElementById("min").value = parseInt(parseInt(vdate.time/60))%60;
+                    document.getElementById("hour").value = parseInt((vdate.time)/3600);
+                }
             }
 
             //axis.phi+=0.01;
@@ -614,7 +641,8 @@
             //earth.degree = -time/100;
             setaxis(axis);
             setperson(person);
-
+            person.theta =(-parseInt(document.getElementById("lat").value)*Math.PI/180);
+            person.phi =(parseInt(document.getElementById("lon").value)*Math.PI/180);
             //console.log(axis.phi/Math.PI*180.0);
             if(axis.y>=0){
                 earth.Earth.rotation.y=earth.degree;
@@ -700,8 +728,8 @@
                 sun.posz = (r*Math.cos(sun.ang)*Math.cos(23.5*Math.PI/180)*Math.sin(axis.theta))+(r*Math.sin(sun.ang)*Math.cos(axis.theta));
             }
             //person.theta = 90*Math.PI/180;
-            person.theta=-127*Math.PI/180;
-            person.phi =38*Math.PI/180;
+            //person.theta=-127*Math.PI/180;
+            //person.phi =38*Math.PI/180;
             //con.koc=1;
             if(con.koc ==1)
             {
