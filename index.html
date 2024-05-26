@@ -198,7 +198,7 @@
             Star.y = y;
             Star.z = z;
         }
-        function setsunpos(sun){
+        function setsunpos(sun,mis){
             sun.ang = -(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180+((daytilmon[2]+(20-1))*(360/365))*Math.PI/180+Math.PI/2;
             let thet = vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI;
             //thet-=axis.theta;
