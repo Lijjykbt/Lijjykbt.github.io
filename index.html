@@ -159,13 +159,13 @@
             //console.log(person.px**2+person.py**2+person.pz**2);
             const vect1 = new THREE.Vector3(person.px-axisx,person.py-axisy,person.pz-axisz)
             const vect2 = new THREE.Vector3(0-axisx,1-axisy,0-axisz);
-            if(axis.y>=0)
+            if(axis.y*axis.x*axis.z>=0)
                 return -vect1.angleTo(vect2);
             return vect1.angleTo(vect2);
             //console.log(obj.rotation.x/Math.PI*180);
 
         }
-        function movStar(Star){
+        function movStar(Star,mis){
             let the = vdate.time/86400*(360)*Math.PI/180-sun.ang-Math.PI;
             let x= r*Math.cos(Star.phi*Math.PI/180)*Math.cos(Star.theta/24*(-2)*Math.PI+the+Math.PI/2);
             let y= r*Math.sin(Star.phi*Math.PI/180);
@@ -173,6 +173,10 @@
             let xp;
             let yp;
             let zp;
+            zp = z*Math.cos(mis)-x*Math.sin(mis);
+            xp = z*Math.sin(mis)+x*Math.cos(mis);
+            x=xp
+            z = zp
             if(axis.y>=0){
                 xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
                 yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
@@ -205,6 +209,11 @@
             let xp;
             let yp;
             let zp;
+            zp = z*Math.cos(mis)-x*Math.sin(mis);
+            xp = z*Math.sin(mis)+x*Math.cos(mis);
+            //console.log(x,z,xp,zp)
+            x=xp
+            z = zp
             if(axis.y>=0){
                 xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
                 yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
@@ -235,7 +244,7 @@
 
 
         }
-        function rotsuncor(obj){
+        function rotsuncor(obj,mis){
             let thet = vdate.time/86400*(360)*Math.PI/180-Math.PI+(((daytilmon[vdate.month-1]+(vdate.day-1))*86400+vdate.time)/86400*(360/365))*Math.PI/180-((daytilmon[2]+(20-1))*(360/365))*Math.PI/180-Math.PI/2;
             
             thet+=Math.PI;
@@ -271,6 +280,10 @@
                 let xp;
                 let yp;
                 let zp;
+                zp = z*Math.cos(mis)-x*Math.sin(mis);
+                xp = z*Math.sin(mis)+x*Math.cos(mis);
+                z = zp
+                x = xp
                 if(axis.y>=0){
                     xp = x*Math.cos(-Math.asin(axis.x/r))-y*Math.sin(-Math.asin(axis.x/r));
                     yp = x*Math.sin(-Math.asin(axis.x/r))+y*Math.cos(-Math.asin(axis.x/r));
@@ -762,7 +775,9 @@
                 //earth.degree =-rotatemiss(person);
                 //earth.Earth.rotation.y=-rotatemiss(person);
                 //rotatemiss(person)
-                earth.Earth.rotation.y = rotatemiss(person);
+                let miss = rotatemiss(person);
+                earth.Earth.rotation.y = miss;
+                //earth.Earth.rotation.y = rotatemiss(person);
                 //console.log(Math.sin(person.phi));
 
                 //console.log(Math.acos((20*Math.cos(person.phi)*Math.cos(person.theta))/r)*180.0/Math.PI);
@@ -770,9 +785,9 @@
                 //console.log("----");
 
 
-                rotsuncor(cordin[cordin.length-1]);
-                setsunpos(sun);
-                movStar(Star);
+                rotsuncor(cordin[cordin.length-1],miss);
+                setsunpos(sun,miss);
+                movStar(Star,miss);
                 axis.theta = person.theta;
                 axis.phi = Math.PI-person.phi;
                 for( let i = 0;i<nofline;i++)
